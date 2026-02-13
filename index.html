@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TEAM_X Thai Consonant Drill</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.letter {
+    font-size: 90px;
+    margin: 20px 0;
+}
+
+.hearts {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 10px;
+    margin: 5px;
+    width: 45%;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #4CAF50;
+    color: white;
+}
+
+button:hover {
+    background: #45a049;
+}
+
+.feedback {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.gameover {
+    color: red;
+    font-size: 22px;
+    margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>TEAM_X Thai Consonant Drill</h2>
+
+    <div class="hearts" id="hearts">❤️ ❤️ ❤️</div>
+
+    <div class="letter" id="letter"></div>
+
+    <div id="choices"></div>
+
+    <div class="feedback" id="feedback"></div>
+</div>
+
+<script>
+
+const consonants = [
+{ letter: "ก", name: "ko kai" },
+{ letter: "ข", name: "kho khai" },
+{ letter: "ฃ", name: "kho khuat" },
+{ letter: "ค", name: "kho khwai" },
+{ letter: "ฅ", name: "kho khon" },
+{ letter: "ฆ", name: "kho ra khang" },
+{ letter: "ง", name: "ngo ngu" },
+{ letter: "จ", name: "cho chan" },
+{ letter: "ฉ", name: "cho ching" },
+{ letter: "ช", name: "cho chang" },
+{ letter: "ซ", name: "so so" },
+{ letter: "ฌ", name: "cho choe" },
+{ letter: "ญ", name: "yo ying" },
+{ letter: "ฎ", name: "do chada" },
+{ letter: "ฏ", name: "to patak" },
+{ letter: "ฐ", name: "tho than" },
+{ letter: "ฑ", name: "tho nang montho" },
+{ letter: "ฒ", name: "tho phu thao" },
+{ letter: "ณ", name: "no nen" },
+{ letter: "ด", name: "do dek" },
+{ letter: "ต", name: "to tao" },
+{ letter: "ถ", name: "tho thung" },
+{ letter: "ท", name: "tho thahan" },
+{ letter: "ธ", name: "tho thong" },
+{ letter: "น", name: "no nu" },
+{ letter: "บ", name: "bo baimai" },
+{ letter: "ป", name: "po pla" },
+{ letter: "ผ", name: "pho phueng" },
+{ letter: "ฝ", name: "fo fa" },
+{ letter: "พ", name: "pho phan" },
+{ letter: "ฟ", name: "fo fan" },
+{ letter: "ภ", name: "pho samphao" },
+{ letter: "ม", name: "mo ma" },
+{ letter: "ย", name: "yo yak" },
+{ letter: "ร", name: "ro ruea" },
+{ letter: "ล", name: "lo ling" },
+{ letter: "ว", name: "wo waen" },
+{ letter: "ศ", name: "so sala" },
+{ letter: "ษ", name: "so ruesi" },
+{ letter: "ส", name: "so suea" },
+{ letter: "ห", name: "ho hip" },
+{ letter: "ฬ", name: "lo chu la" },
+{ letter: "อ", name: "o ang" },
+{ letter: "ฮ", name: "ho nok huk" }
+];
+
+let hearts = 3;
+let current;
+
+function updateHearts() {
+    let heartDisplay = "";
+    for (let i = 0; i < hearts; i++) {
+        heartDisplay += "❤️ ";
+    }
+    document.getElementById("hearts").textContent = heartDisplay;
+}
+
+function getRandomQuestion() {
+    current = consonants[Math.floor(Math.random() * consonants.length)];
+    document.getElementById("letter").textContent = current.letter;
+    generateChoices();
+    document.getElementById("feedback").textContent = "";
+}
+
+function generateChoices() {
+    let choicesDiv = document.getElementById("choices");
+    choicesDiv.innerHTML = "";
+
+    let options = [current];
+
+    while (options.length < 4) {
+        let random = consonants[Math.floor(Math.random() * consonants.length)];
+        if (!options.includes(random)) {
+            options.push(random);
+        }
+    }
+
+    options.sort(() => Math.random() - 0.5);
+
+    options.forEach(option => {
+        let btn = document.createElement("button");
+        btn.textContent = option.name;
+        btn.onclick = () => checkAnswer(option);
+        choicesDiv.appendChild(btn);
+    });
+}
+
+function checkAnswer(option) {
+    if (hearts === 0) return;
+
+    if (option.name === current.name) {
+        document.getElementById("feedback").textContent =
+            "Correct! " + current.letter + " = " + current.name;
+        getRandomQuestion();
+    } else {
+        hearts--;
+        updateHearts();
+        document.getElementById("feedback").textContent = "Wrong!";
+
+        if (hearts === 0) {
+            document.getElementById("feedback").innerHTML =
+                "<div class='gameover'>Game Over</div>";
+            document.getElementById("choices").innerHTML = "";
+        }
+    }
+}
+
+updateHearts();
+getRandomQuestion();
+
+</script>
+
+</body>
+</html>
