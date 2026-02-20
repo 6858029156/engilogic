@@ -70,6 +70,8 @@ button:hover {
 
     <div class="hearts" id="hearts">❤️ ❤️ ❤️</div>
 
+    <div id="counter" style="margin-bottom:10px;font-weight:bold"></div>
+
     <div class="letter" id="letter"></div>
 
     <div id="choices"></div>
@@ -128,6 +130,15 @@ const consonants = [
 
 let hearts = 3;
 let current;
+const known = new Set();
+
+function updateCounter() {
+    const total = consonants.length;
+    const knownCount = known.size;
+    const remaining = total - knownCount;
+    document.getElementById("counter").textContent =
+        `Remaining: ${remaining} / ${total} (Known: ${knownCount})`;
+}
 
 function updateHearts() {
     let heartDisplay = "";
@@ -138,7 +149,16 @@ function updateHearts() {
 }
 
 function getRandomQuestion() {
-    current = consonants[Math.floor(Math.random() * consonants.length)];
+    const pool = consonants.filter(c => !known.has(c.name));
+    if (pool.length === 0) {
+        document.getElementById("letter").textContent = "🎉 All cards known!";
+        document.getElementById("choices").innerHTML = "";
+        document.getElementById("feedback").textContent = "Great job — you've learned all cards.";
+        updateCounter();
+        return;
+    }
+
+    current = pool[Math.floor(Math.random() * pool.length)];
     document.getElementById("letter").textContent = current.letter;
     generateChoices();
     document.getElementById("feedback").textContent = "";
@@ -150,8 +170,13 @@ function generateChoices() {
 
     let options = [current];
 
+    // try to pick distractors from non-known items first
+    const distractorPool = consonants.filter(c => c.name !== current.name && !known.has(c.name));
+    const fallbackPool = consonants.filter(c => c.name !== current.name);
+
     while (options.length < 4) {
-        let random = consonants[Math.floor(Math.random() * consonants.length)];
+        let pool = distractorPool.length >= (4 - options.length) ? distractorPool : fallbackPool;
+        let random = pool[Math.floor(Math.random() * pool.length)];
         if (!options.includes(random)) {
             options.push(random);
         }
@@ -173,6 +198,9 @@ function checkAnswer(option) {
     if (option.name === current.name) {
         document.getElementById("feedback").textContent =
             "Correct! " + current.letter + " = " + current.name;
+        // mark as known and update counter
+        known.add(current.name);
+        updateCounter();
         getRandomQuestion();
     } else {
         hearts--;
@@ -188,6 +216,7 @@ function checkAnswer(option) {
 }
 
 updateHearts();
+updateCounter();
 getRandomQuestion();
 
 </script>
