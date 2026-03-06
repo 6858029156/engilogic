@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TEAM_X Thai Consonant Drill</title>
+<title>Thai Consonant Drill</title>
 
 <style>
 body {
@@ -27,43 +27,25 @@ body {
 input {
     padding: 8px;
     width: 80%;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 button {
-    padding: 10px;
-    margin: 5px;
-    width: 45%;
-    font-size: 14px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    background: #4CAF50;
+    padding: 10px 20px;
+    background: #2d8cff;
     color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
 button:hover {
-    background: #45a049;
+    background: #1b6fd9;
 }
 
-.letter {
-    font-size: 90px;
-    margin: 20px 0;
-}
-
-.hearts {
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-.feedback {
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-.gameover {
-    color: red;
-    font-size: 20px;
+#quiz-area {
+    margin-top: 20px;
+    font-size: 22px;
 }
 </style>
 </head>
@@ -71,158 +53,42 @@ button:hover {
 <body>
 
 <div class="container">
+    <h2>CSII Team X presents</h2>
+    <h3>Thai Consonants</h3>
 
-<h2>TEAM_X Thai Consonant Drill</h2>
-
-<!-- START SECTION -->
-<div id="startSection">
     <input type="text" id="nickname" placeholder="Enter your nickname">
+
     <br>
     <button onclick="startQuiz()">Start Quiz</button>
-</div>
 
-<!-- QUIZ SECTION -->
-<div id="quizSection" style="display:none;">
-    <h3 id="playerInfo"></h3>
-    <div class="hearts" id="hearts"></div>
-    <div id="counter"></div>
-    <div class="letter" id="letter"></div>
-    <div id="choices"></div>
-    <div class="feedback" id="feedback"></div>
-</div>
-
+    <div id="quiz-area"></div>
 </div>
 
 <script>
-
-// ⚠️ CHANGE THIS AFTER DEPLOYING TO RENDER
-const API_URL = "https://YOURSITE-service.onrender.com";
-
-const consonants = [
-{ letter: "ก", name: "ko kai" }, { letter: "ข", name: "kho khai" },
-{ letter: "ฃ", name: "kho khuat" }, { letter: "ค", name: "kho khwai" },
-{ letter: "ฅ", name: "kho khon" }, { letter: "ฆ", name: "kho ra khang" },
-{ letter: "ง", name: "ngo ngu" }, { letter: "จ", name: "cho chan" },
-{ letter: "ฉ", name: "cho ching" }, { letter: "ช", name: "cho chang" },
-{ letter: "ซ", name: "so so" }, { letter: "ฌ", name: "cho choe" },
-{ letter: "ญ", name: "yo ying" }, { letter: "ฎ", name: "do chada" },
-{ letter: "ฏ", name: "to patak" }, { letter: "ฐ", name: "tho than" },
-{ letter: "ฑ", name: "tho nang montho" }, { letter: "ฒ", name: "tho phu thao" },
-{ letter: "ณ", name: "no nen" }, { letter: "ด", name: "do dek" },
-{ letter: "ต", name: "to tao" }, { letter: "ถ", name: "tho thung" },
-{ letter: "ท", name: "tho thahan" }, { letter: "ธ", name: "tho thong" },
-{ letter: "น", name: "no nu" }, { letter: "บ", name: "bo baimai" },
-{ letter: "ป", name: "po pla" }, { letter: "ผ", name: "pho phueng" },
-{ letter: "ฝ", name: "fo fa" }, { letter: "พ", name: "pho phan" },
-{ letter: "ฟ", name: "fo fan" }, { letter: "ภ", name: "pho samphao" },
-{ letter: "ม", name: "mo ma" }, { letter: "ย", name: "yo yak" },
-{ letter: "ร", name: "ro ruea" }, { letter: "ล", name: "lo ling" },
-{ letter: "ว", name: "wo waen" }, { letter: "ศ", name: "so sala" },
-{ letter: "ษ", name: "so ruesi" }, { letter: "ส", name: "so suea" },
-{ letter: "ห", name: "ho hip" }, { letter: "ฬ", name: "lo chu la" },
-{ letter: "อ", name: "o ang" }, { letter: "ฮ", name: "ho nok huk" }
-];
-
-let hearts = 3;
-let current;
-let known = new Set();
-
 async function startQuiz() {
     const nickname = document.getElementById("nickname").value;
 
     if (!nickname) {
-        alert("Please enter nickname");
+        alert("Please enter your nickname");
         return;
     }
 
     try {
-        const response = await fetch(`${API_URL}/start/${nickname}`);
+        const response = await fetch(
+            `https://engilogic-jrpm.onrender.com/start/${nickname}`
+        );
+
         const data = await response.json();
 
-        document.getElementById("playerInfo").textContent =
-            nickname + " | Streak: " + data.counter;
+        document.getElementById("quiz-area").innerHTML =
+            `<p><strong>${data.nickname}</strong> — Starts: ${data.counter}</p>
+             <p>🔥 Thai Consonant Drill Ready!</p>`;
 
     } catch (error) {
-        document.getElementById("playerInfo").textContent =
-            nickname + " | (Backend not connected)";
-    }
-
-    document.getElementById("startSection").style.display = "none";
-    document.getElementById("quizSection").style.display = "block";
-
-    updateHearts();
-    updateCounter();
-    getRandomQuestion();
-}
-
-function updateHearts() {
-    let heartDisplay = "";
-    for (let i = 0; i < hearts; i++) heartDisplay += "❤️ ";
-    document.getElementById("hearts").textContent = heartDisplay;
-}
-
-function updateCounter() {
-    document.getElementById("counter").textContent =
-        `Known: ${known.size} / ${consonants.length}`;
-}
-
-function getRandomQuestion() {
-    const pool = consonants.filter(c => !known.has(c.name));
-
-    if (pool.length === 0) {
-        document.getElementById("letter").textContent = "🎉 All learned!";
-        document.getElementById("choices").innerHTML = "";
-        return;
-    }
-
-    current = pool[Math.floor(Math.random() * pool.length)];
-    document.getElementById("letter").textContent = current.letter;
-    generateChoices();
-    document.getElementById("feedback").textContent = "";
-}
-
-function generateChoices() {
-    let choicesDiv = document.getElementById("choices");
-    choicesDiv.innerHTML = "";
-
-    let options = [current];
-
-    while (options.length < 4) {
-        let random = consonants[Math.floor(Math.random() * consonants.length)];
-        if (!options.includes(random)) options.push(random);
-    }
-
-    options.sort(() => Math.random() - 0.5);
-
-    options.forEach(option => {
-        let btn = document.createElement("button");
-        btn.textContent = option.name;
-        btn.onclick = () => checkAnswer(option);
-        choicesDiv.appendChild(btn);
-    });
-}
-
-function checkAnswer(option) {
-    if (hearts === 0) return;
-
-    if (option.name === current.name) {
-        document.getElementById("feedback").textContent =
-            "Correct! " + current.name;
-        known.add(current.name);
-        updateCounter();
-        getRandomQuestion();
-    } else {
-        hearts--;
-        updateHearts();
-        document.getElementById("feedback").textContent = "Wrong!";
-        if (hearts === 0) {
-            document.getElementById("feedback").innerHTML =
-                "<div class='gameover'>Game Over</div>";
-            document.getElementById("choices").innerHTML = "";
-        }
+        document.getElementById("quiz-area").innerHTML =
+            "<p>Error connecting to server</p>";
     }
 }
-
 </script>
 
 </body>
