@@ -1,9 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from database import engine, SessionLocal
+import models
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Allow frontend to talk to backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,12 +17,22 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message": "API is running successfully"}
+    return {"message": "API is running"}
 
-@app.get("/quiz")
-def get_quiz():
-    return {
-        "question": "What is ก?",
-        "choices": ["ko kai", "kho khai", "ngo ngu", "cho chan"],
-        "answer": "ko kai"
-    }
+@app.get("/start/{nickname}")
+def start_quiz(nickname: str):
+    db = SessionLocal()
+
+    user = db.query(models.User).filter(models.User.nickname == nickname).first()
+
+    if not user:
+        user = models.User(nickname=nickname, counter=1)
+        db.add(user)
+    else:
+        user.counter += 1
+
+    db.commit()
+    db.refresh(user)
+    db.close()
+
+    return {"nickname": nickname, "counter": user.counter}
