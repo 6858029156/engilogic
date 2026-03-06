@@ -19,9 +19,31 @@ body {
     background: white;
     padding: 30px;
     border-radius: 15px;
-    width: 400px;
+    width: 420px;
     text-align: center;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+input {
+    padding: 8px;
+    width: 80%;
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 10px;
+    margin: 5px;
+    width: 45%;
+    font-size: 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #4CAF50;
+    color: white;
+}
+
+button:hover {
+    background: #45a049;
 }
 
 .letter {
@@ -34,31 +56,14 @@ body {
     margin-bottom: 10px;
 }
 
-button {
-    padding: 10px;
-    margin: 5px;
-    width: 45%;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    background: #4CAF50;
-    color: white;
-}
-
-button:hover {
-    background: #45a049;
-}
-
 .feedback {
-    margin-top: 15px;
+    margin-top: 10px;
     font-weight: bold;
 }
 
 .gameover {
     color: red;
-    font-size: 22px;
-    margin-top: 15px;
+    font-size: 20px;
 }
 </style>
 </head>
@@ -66,95 +71,107 @@ button:hover {
 <body>
 
 <div class="container">
-    <h2>TEAM_X Thai Consonant Drill</h2>
 
-    <div class="hearts" id="hearts">❤️ ❤️ ❤️</div>
+<h2>TEAM_X Thai Consonant Drill</h2>
 
-    <div id="counter" style="margin-bottom:10px;font-weight:bold"></div>
+<!-- START SECTION -->
+<div id="startSection">
+    <input type="text" id="nickname" placeholder="Enter your nickname">
+    <br>
+    <button onclick="startQuiz()">Start Quiz</button>
+</div>
 
+<!-- QUIZ SECTION -->
+<div id="quizSection" style="display:none;">
+    <h3 id="playerInfo"></h3>
+    <div class="hearts" id="hearts"></div>
+    <div id="counter"></div>
     <div class="letter" id="letter"></div>
-
     <div id="choices"></div>
-
     <div class="feedback" id="feedback"></div>
+</div>
+
 </div>
 
 <script>
 
+// ⚠️ CHANGE THIS AFTER DEPLOYING TO RENDER
+const API_URL = "https://YOURSITE-service.onrender.com";
+
 const consonants = [
-{ letter: "ก", name: "ko kai" },
-{ letter: "ข", name: "kho khai" },
-{ letter: "ฃ", name: "kho khuat" },
-{ letter: "ค", name: "kho khwai" },
-{ letter: "ฅ", name: "kho khon" },
-{ letter: "ฆ", name: "kho ra khang" },
-{ letter: "ง", name: "ngo ngu" },
-{ letter: "จ", name: "cho chan" },
-{ letter: "ฉ", name: "cho ching" },
-{ letter: "ช", name: "cho chang" },
-{ letter: "ซ", name: "so so" },
-{ letter: "ฌ", name: "cho choe" },
-{ letter: "ญ", name: "yo ying" },
-{ letter: "ฎ", name: "do chada" },
-{ letter: "ฏ", name: "to patak" },
-{ letter: "ฐ", name: "tho than" },
-{ letter: "ฑ", name: "tho nang montho" },
-{ letter: "ฒ", name: "tho phu thao" },
-{ letter: "ณ", name: "no nen" },
-{ letter: "ด", name: "do dek" },
-{ letter: "ต", name: "to tao" },
-{ letter: "ถ", name: "tho thung" },
-{ letter: "ท", name: "tho thahan" },
-{ letter: "ธ", name: "tho thong" },
-{ letter: "น", name: "no nu" },
-{ letter: "บ", name: "bo baimai" },
-{ letter: "ป", name: "po pla" },
-{ letter: "ผ", name: "pho phueng" },
-{ letter: "ฝ", name: "fo fa" },
-{ letter: "พ", name: "pho phan" },
-{ letter: "ฟ", name: "fo fan" },
-{ letter: "ภ", name: "pho samphao" },
-{ letter: "ม", name: "mo ma" },
-{ letter: "ย", name: "yo yak" },
-{ letter: "ร", name: "ro ruea" },
-{ letter: "ล", name: "lo ling" },
-{ letter: "ว", name: "wo waen" },
-{ letter: "ศ", name: "so sala" },
-{ letter: "ษ", name: "so ruesi" },
-{ letter: "ส", name: "so suea" },
-{ letter: "ห", name: "ho hip" },
-{ letter: "ฬ", name: "lo chu la" },
-{ letter: "อ", name: "o ang" },
-{ letter: "ฮ", name: "ho nok huk" }
+{ letter: "ก", name: "ko kai" }, { letter: "ข", name: "kho khai" },
+{ letter: "ฃ", name: "kho khuat" }, { letter: "ค", name: "kho khwai" },
+{ letter: "ฅ", name: "kho khon" }, { letter: "ฆ", name: "kho ra khang" },
+{ letter: "ง", name: "ngo ngu" }, { letter: "จ", name: "cho chan" },
+{ letter: "ฉ", name: "cho ching" }, { letter: "ช", name: "cho chang" },
+{ letter: "ซ", name: "so so" }, { letter: "ฌ", name: "cho choe" },
+{ letter: "ญ", name: "yo ying" }, { letter: "ฎ", name: "do chada" },
+{ letter: "ฏ", name: "to patak" }, { letter: "ฐ", name: "tho than" },
+{ letter: "ฑ", name: "tho nang montho" }, { letter: "ฒ", name: "tho phu thao" },
+{ letter: "ณ", name: "no nen" }, { letter: "ด", name: "do dek" },
+{ letter: "ต", name: "to tao" }, { letter: "ถ", name: "tho thung" },
+{ letter: "ท", name: "tho thahan" }, { letter: "ธ", name: "tho thong" },
+{ letter: "น", name: "no nu" }, { letter: "บ", name: "bo baimai" },
+{ letter: "ป", name: "po pla" }, { letter: "ผ", name: "pho phueng" },
+{ letter: "ฝ", name: "fo fa" }, { letter: "พ", name: "pho phan" },
+{ letter: "ฟ", name: "fo fan" }, { letter: "ภ", name: "pho samphao" },
+{ letter: "ม", name: "mo ma" }, { letter: "ย", name: "yo yak" },
+{ letter: "ร", name: "ro ruea" }, { letter: "ล", name: "lo ling" },
+{ letter: "ว", name: "wo waen" }, { letter: "ศ", name: "so sala" },
+{ letter: "ษ", name: "so ruesi" }, { letter: "ส", name: "so suea" },
+{ letter: "ห", name: "ho hip" }, { letter: "ฬ", name: "lo chu la" },
+{ letter: "อ", name: "o ang" }, { letter: "ฮ", name: "ho nok huk" }
 ];
 
 let hearts = 3;
 let current;
-const known = new Set();
+let known = new Set();
 
-function updateCounter() {
-    const total = consonants.length;
-    const knownCount = known.size;
-    const remaining = total - knownCount;
-    document.getElementById("counter").textContent =
-        `Remaining: ${remaining} / ${total} (Known: ${knownCount})`;
+async function startQuiz() {
+    const nickname = document.getElementById("nickname").value;
+
+    if (!nickname) {
+        alert("Please enter nickname");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/start/${nickname}`);
+        const data = await response.json();
+
+        document.getElementById("playerInfo").textContent =
+            nickname + " | Streak: " + data.counter;
+
+    } catch (error) {
+        document.getElementById("playerInfo").textContent =
+            nickname + " | (Backend not connected)";
+    }
+
+    document.getElementById("startSection").style.display = "none";
+    document.getElementById("quizSection").style.display = "block";
+
+    updateHearts();
+    updateCounter();
+    getRandomQuestion();
 }
 
 function updateHearts() {
     let heartDisplay = "";
-    for (let i = 0; i < hearts; i++) {
-        heartDisplay += "❤️ ";
-    }
+    for (let i = 0; i < hearts; i++) heartDisplay += "❤️ ";
     document.getElementById("hearts").textContent = heartDisplay;
+}
+
+function updateCounter() {
+    document.getElementById("counter").textContent =
+        `Known: ${known.size} / ${consonants.length}`;
 }
 
 function getRandomQuestion() {
     const pool = consonants.filter(c => !known.has(c.name));
+
     if (pool.length === 0) {
-        document.getElementById("letter").textContent = "🎉 All cards known!";
+        document.getElementById("letter").textContent = "🎉 All learned!";
         document.getElementById("choices").innerHTML = "";
-        document.getElementById("feedback").textContent = "Great job — you've learned all cards.";
-        updateCounter();
         return;
     }
 
@@ -170,16 +187,9 @@ function generateChoices() {
 
     let options = [current];
 
-    // try to pick distractors from non-known items first
-    const distractorPool = consonants.filter(c => c.name !== current.name && !known.has(c.name));
-    const fallbackPool = consonants.filter(c => c.name !== current.name);
-
     while (options.length < 4) {
-        let pool = distractorPool.length >= (4 - options.length) ? distractorPool : fallbackPool;
-        let random = pool[Math.floor(Math.random() * pool.length)];
-        if (!options.includes(random)) {
-            options.push(random);
-        }
+        let random = consonants[Math.floor(Math.random() * consonants.length)];
+        if (!options.includes(random)) options.push(random);
     }
 
     options.sort(() => Math.random() - 0.5);
@@ -197,8 +207,7 @@ function checkAnswer(option) {
 
     if (option.name === current.name) {
         document.getElementById("feedback").textContent =
-            "Correct! " + current.letter + " = " + current.name;
-        // mark as known and update counter
+            "Correct! " + current.name;
         known.add(current.name);
         updateCounter();
         getRandomQuestion();
@@ -206,7 +215,6 @@ function checkAnswer(option) {
         hearts--;
         updateHearts();
         document.getElementById("feedback").textContent = "Wrong!";
-
         if (hearts === 0) {
             document.getElementById("feedback").innerHTML =
                 "<div class='gameover'>Game Over</div>";
@@ -214,10 +222,6 @@ function checkAnswer(option) {
         }
     }
 }
-
-updateHearts();
-updateCounter();
-getRandomQuestion();
 
 </script>
 
